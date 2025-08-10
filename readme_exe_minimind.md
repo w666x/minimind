@@ -19,7 +19,7 @@
        * **模型蒸馏**：通过知识蒸馏技术进一步优化模型性能和效率。
        * **LoRA微调**：高效地对特定领域（如医疗、自我认知）进行参数高效的微调。
     3. 自定义分词器与数据处理: 
-       - 包含自定义分词器（tokenizer）的训练代码，以及用于处理和清洗预训练、 SFT、RLHF等各阶段训练数据的工具和脚本。
+       - 包含自定义分词器（tokenizer）的训练代码，以及用于处理和清洗预训练、 SFT、RLHF等各阶段训练 数据的工具和脚本。
        - 项目提供了多种高质量数据集供训练使用。
     4. 推理与部署工具: 提供了模型评估脚本（eval_model.py）、Web UI演示（web_demo.py）以及兼容OpenAI
        - API的服务端实现（serve_openai_api.py），方便测试和部署模型。
@@ -53,19 +53,20 @@ vllm serve ./MiniMind2/ --served-model-name "minimind"
 
 
 
-#### 能干啥
+#### 仓库能干啥
 
 
 - 预训练、微调等拆解步骤，说明说句要求及训练细节
 
-| 模块 | 功能 | 耗时/耗资源 | 数据demo
-|:-|:-|:-|:-
-| 无监督预训练 | 模型自己从大量文本中总结规律学习知识点 | 数据多少G；训练多少天
-| 无监督预训练 | 模型自己从大量文本中总结规律学习知识点 | 数据多少G；训练多少天
-| 无监督预训练 | 模型自己从大量文本中总结规律学习知识点 | 数据多少G；训练多少天
-| 无监督预训练 | 模型自己从大量文本中总结规律学习知识点 | 数据多少G；训练多少天
-| 无监督预训练 | 模型自己从大量文本中总结规律学习知识点 | 数据多少G；训练多少天
-| 无监督预训练 | 模型自己从大量文本中总结规律学习知识点 | 数据多少G；训练多少天
+| 模块 | 功能 | 耗时/耗资源 | 数据demo | 损失函数
+|:-|:-|:-|:-|:-
+| [无监督预训练](#模型预训练) | 模型自己从大量文本中总结规律学习知识点 | 1.6G；15min/epoch/4卡 | {'text': '<\|im_start\|>鉴别一组中文文章的风格和特点，例如官方、口语、文言等。需要提供样例文章才能准确鉴别不同的风格和特点。<\|im_end\|> <\|im_start\|>好的，现在帮我查一下今天的天气怎么样?今天的天气依据地区而异。请问你需要我帮你查询哪个地区的天气呢？<\|im_end\|>'} |  CrossEntropyLoss
+| [SFT模型微调](#模型SFT微调) | 把半成品LLM施加一个自定义的聊天模板进行微调 | 7.5G；12min/epoch/4卡 | {"conversations": [{"role": "user","content": "请告诉我在中国古代的“四大发明”是什么？"},{"role": "assistant","content": "中国古代的“四大发明”是指造纸术、印刷术、火药和指南针。"}]} |  CrossEntropyLoss
+| [RLHF训练](#RLHF训练) | 促使模型表现能够更符合人的偏好，降低让人类不满意答案的产生概率 | 0.8G；12min/epoch/4卡 | {"chosen": [{"content": "Question", "role": "user"}, {"content": "good answer", "role": "assistant"}], "rejected": [{"content": "Question", "role": "user"}, {"content": "bad answer", "role":"assistant"}]} |  DPO-loss， 计算当前模型和参考模型之间的对数概率差值差异
+| [LORA微调](#LORA微调) | 一种高效的参数高效微调（Parameter-Efficient Fine-Tuning, PEFT）方法，旨在通过低秩分解的方式对预训练模型进行微调 | 0.13M；1min/epoch/4卡 |{"conversations": [{"role": "user","content": "请告诉我在中国古代的“四大发明”是什么？"},{"role": "assistant","content": "中国古代的“四大发明”是指造纸术、印刷术、火药和指南针。"}]} |  CrossEntropyLoss
+| [推理模型](#推理模型) | 通过**损失函数通过增加特殊推理标记之间【think、answer】内容的损失权重，使模型更加关注推理过程的学习。** | 0.3G；10min/epoch/4卡 | {"conversations": [{"role": "user","content": "请告诉我在中国古代的“四大发明”是什么？"},{"role": "assistant","content": "中国古代的“四大发明”是指造纸术、印刷术、火药和指南针。"}]} |  CrossEntropyLoss, 对think等标记进行加权
+| [模型蒸馏](#模型蒸馏) | 知识蒸馏可以进一步优化模型的性能和效率，所谓知识蒸馏，即学生模型面向教师模型学习 | 8.4G；275min/epoch/4卡 | {"chosen": [{"content": "Question", "role": "user"}, {"content": "good answer", "role": "assistant"}], "rejected": [{"content": "Question", "role": "user"}, {"content": "bad answer", "role":"assistant"}]} |  nn.CrossEntropyLoss(reduction='none') + kl_div
+| [tokenizer模型](#tokenizer训练) | 训练自己的tokenizer分词器 | 1.6G；30min+ | {'text': '<\|im_start\|>鉴别一组中文文章的风格和特点，例如官方、口语、文言等。需要提供样例文章才能准确鉴别不同的风格和特点。<\|im_end\|> <\|im_start\|>好的，现在帮我查一下今天的天气怎么样?今天的天气依据地区而异。请问你需要我帮你查询哪个地区的天气呢？<\|im_end\|>'} 
 
 
 
@@ -110,6 +111,7 @@ git clone https://www.modelscope.cn/gongjy/MiniMind2.git
     - loss: nn.CrossEntropyLoss(reduction='none')
     - optimizer: AdamW
     - embedding maxlen: 512
+    - hidden_size: 512; num_hidden_layers: 8
 
 
 | 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
@@ -127,7 +129,7 @@ quality
 
 ```sh
 # 原文
-{'text': '<|im_start|>鉴别一组中文文章的风格和特点，例如官方、口语、文言等。需要提供样例文章才能准确鉴别不同的风格和特点。<|im_end|> <|im_start|>好的，现在帮我查一下今天的天气怎么样?今天的天气依据地区而异。请问你需要我帮你查询哪个地区的天气呢？<|im_end|> <|im_start|>打开闹钟功能，定一个明天早上七点的闹钟。好的，我已经帮您打开闹钟功能，闹钟将在明天早上七点准时响起。<|im_end|> <|im_start|>为以下场景写一句话描述：一个孤独的老人坐在公园长椅上看着远处。一位孤独的老人坐在公园长椅上凝视远方。<|im_end|> <|im_start|>非常感谢你的回答。请告诉我，这些数据是关于什么主题的？这些数据是关于不同年龄段的男女人口比例分布的。<|im_end|> <|im_start|>帮我想一个有趣的标题。这个挺有趣的："如何成为一名成功的魔术师" 调皮的标题往往会吸引读者的注意力。<|im_end|> <|im_start|>回答一个问题，地球的半径是多少？地球的平均半径约为6371公里，这是地球自赤道到两极的距离的平均值。<|im_end|> <|im_start|>识别文本中的语气，并将其分类为喜悦、悲伤、惊异等。\n文本：“今天是我的生日！”这个文本的语气是喜悦。<|im_end|>'}
+{'text': '<|im_start|>鉴别一组中文文章的风格和特点，例如官方、口语、文言等。需要提供样例文章才能准确鉴别不同的风格和特点。<|im_end|> <|im_start|>好的，现在帮我查一下今天的天气怎么样?今天的天气依据地区而异。请问你需要我帮你查询哪个地区的天气呢？<|im_end|>'}
 
 # 待训练文本
 input_ids为上文的text对应的value分词编码结果
@@ -148,7 +150,7 @@ loss = loss / args.accumulation_steps
 
 
 
-#### 模型微调
+#### 模型SFT微调
 
 - 1. 开始模型训练
     - SFT阶段就需要把半成品LLM施加一个自定义的聊天模板进行微调。
@@ -162,7 +164,7 @@ torchrun --nproc_per_node 4 train_full_sft.py # 多卡
 python train_full_sft.py # 单卡
 ```
 
-[minimind_sft_multigpu](./pics/minimind_sft_multigpu.png)
+![minimind_sft_multigpu](./pics/minimind_sft_multigpu.png)
 
 
 
@@ -236,13 +238,15 @@ Y = torch.tensor(input_ids[1:], dtype=torch.long)
 
 
 
-#### RLHF训练（人类反馈强化学习）
+#### RLHF训练
 
 
-- 1. 开始模型训练
+- 1. 开始模型训练, 人类反馈强化学习
     - 本文选择的是RLHF系列之-直接偏好优化(Direct Preference Optimization, DPO)。与PPO(Proximal Policy Optimization)这种需要奖励模型、价值模型的RL算法不同；
     - **DPO通过推导PPO奖励模型的显式解，把在线奖励模型换成离线数据，Ref模型输出可以提前保存。**
     - DPO性能几乎不变，只用跑 actor_model 和 ref_model 两个模型，大大节省显存开销和增加训练稳定性。
+    - RLHF训练步骤**并非必须**，此步骤难以提升模型“智力”而通常仅用于提升模型的“礼貌”，有利（符合偏好、减少有害内容）也有弊（样本收集昂贵、反馈偏差、多样性损失）。
+
 
 ```sh
 cd minimind/trainer
@@ -411,10 +415,10 @@ with ctx:
 
 
 
-#### 推理模型 (Reasoning Model)
+#### 推理模型
 
 
-- 1. 开始模型训练
+- 1. 开始模型训练, 即Reasoning Model实现
     - 通过**损失函数通过增加特殊推理标记之间【think、answer】内容的损失权重，使模型更加关注推理过程的学习。**
     - 具体来讲，即识别到上述这些token的位置，将其loss_mask值调整为10
 
@@ -571,6 +575,7 @@ python train_distillation.py
 python ./scripts/train_tokenizer.py
 ```
 
+![minimind_tokenizer](./pics/minimind_tokenizer.png)
 
 
 ## 其他
@@ -581,38 +586,38 @@ python ./scripts/train_tokenizer.py
 
 - 1. 本文用到的数据集如下
 
-* `dpo.jsonl` --RLHF阶段数据集
-* `lora_identity.jsonl` --自我认知数据集（例如：你是谁？我是minimind...），推荐用于lora训练（亦可用于全参SFT，勿被名字局限）
-* `lora_medical.jsonl` --医疗问答数据集，推荐用于lora训练（亦可用于全参SFT，勿被名字局限）
-* `pretrain_hq.jsonl`✨ --预训练数据集，整合自jiangshu科技
-* `r1_mix_1024.jsonl` --DeepSeek-R1-1.5B蒸馏数据，每条数据字符最大长度为1024（因此训练时设置max_seq_len=1024）
-* `sft_1024.jsonl` --整合自Qwen2.5蒸馏数据（是sft_2048的子集），每条数据字符最大长度为1024（因此训练时设置max_seq_len=1024）
-* `sft_2048.jsonl` --整合自Qwen2.5蒸馏数据，每条数据字符最大长度为2048（因此训练时设置max_seq_len=2048）
-* `sft_512.jsonl` --整合自匠数科技SFT数据，每条数据字符最大长度为512（因此训练时设置max_seq_len=512）
-* `sft_mini_512.jsonl`✨ --极简整合自匠数科技SFT数据+Qwen2.5蒸馏数据（用于快速训练Zero模型），每条数据字符最大长度为512（因此训练时设置max_seq_len=512）
-* `tokenizer_train.jsonl` --均来自于`匠数大模型数据集`，这部分数据相对次要，（不推荐自己重复训练tokenizer，理由如上）如需自己训练tokenizer可以自由选择数据集。
+| 文件名                  | 描述                                                                 | 来源                | 推荐用途                                   | 最大长度 | 备注                                                                 |
+|-------------------------|----------------------------------------------------------------------|---------------------|--------------------------------------------|----------|----------------------------------------------------------------------|
+| `dpo.jsonl`             | RLHF阶段数据集                                                       |                     |                                            |          |                                                                      |
+| `lora_identity.jsonl`   | 自我认知数据集（例如：你是谁？我是minimind...）                      |                     | 推荐用于lora训练（亦可用于全参SFT，勿被名字局限） |          | 示例：你是谁？我是minimind...                                        |
+| `lora_medical.jsonl`    | 医疗问答数据集                                                       |                     | 推荐用于lora训练（亦可用于全参SFT，勿被名字局限） |          |                                                                      |
+| `pretrain_hq.jsonl`     | 预训练数据集                                                         | 整合自jiangshu科技  |                                            |          | ✨                                                                   |
+| `r1_mix_1024.jsonl`     | DeepSeek-R1-1.5B蒸馏数据                                             |                     |                                            | 1024     | 训练时设置max_seq_len=1024                                           |
+| `sft_1024.jsonl`        | 整合自Qwen2.5蒸馏数据（是sft_2048的子集）                            | Qwen2.5             |     SFT微调用    | 1024     | 训练时设置max_seq_len=1024                                           |
+| `sft_2048.jsonl`        | 整合自Qwen2.5蒸馏数据                                                | Qwen2.5             |    SFT微调用  | 2048     | 训练时设置max_seq_len=2048                                           |
+| `sft_512.jsonl`         | 整合自匠数科技SFT数据                                                | 匠数科技            |     SFT微调用     | 512      | 训练时设置max_seq_len=512                                            |
+| `sft_mini_512.jsonl`    | 极简整合自匠数科技SFT数据+Qwen2.5蒸馏数据（用于快速训练Zero模型）     | 匠数科技 + Qwen2.5  | 用于快速训练Zero模型                       | 512      | 训练时设置max_seq_len=512, ✨                                        |
+| `tokenizer_train.jsonl` | 均来自于`匠数大模型数据集`                                           | 匠数大模型数据集    | 相对次要，不推荐自己重复训练tokenizer      |          | 如需自己训练tokenizer可以自由选择数据集                              |
 
-</details>
 
-
-[minimind_dataset](./pics/minimind_dataset.png)
+![minimind_dataset](./pics/minimind_dataset.png)
 
 
 - 2. 更多开源数据集
     - 更多数据集，目前已经有[HqWu-HITCS/Awesome-Chinese-LLM](https://github.com/HqWu-HITCS/Awesome-Chinese-LLM) 在收集和梳理中文LLM相关的开源模型、应用、数据集及教程等资料，并持续更新这方面的最新进展。全面且专业，Respect！
 
-- 1. 匠数大模型SFT数据集
+
+- 3. 匠数大模型SFT数据集
     - 是一个完整、格式统一、安全的大模型训练和研究资源。从网络上的公开数据源收集并整理了大量开源数据集，对其进行了格式统一，数据清洗，**包含10M条数据的中文数据集和包含2M条数据的英文数据集** 。
     - 下载地址为 [匠数大模型SFT数据集](https://www.modelscope.cn/datasets/deepctrl/deepctrl-sft-data)
 
 
-- 2. Magpie-SFT数据集
+- 4. Magpie-SFT数据集
     - 收集了~1M条来自Qwen2/2.5的高质量对话
     - 下载地址为，[Magpie-SFT数据集](https://www.modelscope.cn/organization/Magpie-Align)
 
 
-
-- 3. Magpie-DPO数据集
+- 5. Magpie-DPO数据集
   - 大约200k条偏好数据（均是英文）生成自Llama3.1-70B/8B，可以用于训练奖励模型，优化模型回复质量，使其更加符合人类偏好。
     - 下载地址为，来自[Magpie-DPO数据集](https://www.modelscope.cn/datasets/Magpie-Align/MagpieLM-DPO-Data-v0.1)
 
@@ -626,14 +631,13 @@ python ./scripts/train_tokenizer.py
 - 1. 环境说明
 
 ```sh
-ubuntu1~20.04.1
-NVIDIA GeForce RTX 3090 
-Python 3.12.9
+ubuntu1~11.4.0
+NVIDIA: A100
+docker: 27.5.1,
+Python: 3.12.11
 CUDA Version: 12.2
-nvcc: 12.6
-uv: 0.7.2
-npm: 9.6.4
-node: 20.1.0
+nvcc: 12.8
+imgae: nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04
 ```
 
 - 2. python环境
@@ -641,8 +645,7 @@ node: 20.1.0
 
 
 ```sh
-vllm==0.8.5.post1
-streamlit==
+tiktoken>=0.5.1
 ```
 
 
@@ -651,39 +654,24 @@ streamlit==
 
 ```sh
 .
-├── agent
-├── agentic_reasoning
-├── api
-├── conf
-├── CONTRIBUTING.md
-├── deepdoc
-├── docker
-├── Dockerfile
-├── Dockerfile.deps
-├── Dockerfile.scratch.oc9
-├── docs
-├── download_deps.py
-├── example
-├── graphrag
-├── helm
-├── intergrations
-├── LICENSE
-├── pics
-├── pyproject.toml
-├── rag
-├── readme_exe.md
-├── README_id.md
-├── README_ja.md
-├── README_ko.md
-├── README.md
-├── README_pt_br.md
-├── README_tzh.md
-├── README_zh.md
-├── sdk
-├── SECURITY.md
-├── show_env.sh
-├── uv.lock
-└── web
+|-- CODE_OF_CONDUCT.md
+|-- LICENSE
+|-- MiniMind2
+|-- README.md
+|-- README_en.md
+|-- data
+|-- dataset
+|-- eval_model.py
+|-- flowchart.md
+|-- images
+|-- model
+|-- nohup.out
+|-- out
+|-- output
+|-- readme_exe.md
+|-- requirements.txt
+|-- scripts
+`-- trainer
 ```
 
 
@@ -691,130 +679,66 @@ streamlit==
   <summary>详细目录树</summary>
   <pre><code> 
 .
-├── agent
-│   ├── canvas.py
-│   ├── component
-│   ├── __init__.py
-│   ├── README.md
-│   ├── README_zh.md
-│   ├── settings.py
-│   ├── templates
-│   └── test
-├── agentic_reasoning
-│   ├── deep_research.py
-│   ├── __init__.py
-│   └── prompts.py
-├── api
-│   ├── apps
-│   ├── constants.py
-│   ├── db
-│   ├── __init__.py
-│   ├── ragflow_server.py
-│   ├── settings.py
-│   ├── utils
-│   ├── validation.py
-│   └── versions.py
-├── conf
-│   ├── infinity_mapping.json
-│   ├── llm_factories.json
-│   ├── mapping.json
-│   ├── private.pem
-│   ├── public.pem
-│   └── service_conf.yaml
-├── CONTRIBUTING.md
-├── deepdoc
-│   ├── __init__.py
-│   ├── parser
-│   ├── README.md
-│   ├── README_zh.md
-│   └── vision
-├── docker
-│   ├── docker-compose-base.yml
-│   ├── docker-compose-CN-oc9.yml
-│   ├── docker-compose-gpu-CN-oc9.yml
-│   ├── docker-compose-gpu.yml
-│   ├── docker-compose-macos.yml
-│   ├── docker-compose.yml
-│   ├── entrypoint.sh
-│   ├── infinity_conf.toml
-│   ├── init.sql
-│   ├── launch_backend_service.sh
-│   ├── nginx
-│   ├── README.md
-│   └── service_conf.yaml.template
-├── Dockerfile
-├── Dockerfile.deps
-├── Dockerfile.scratch.oc9
-├── docs
-│   ├── _category_.json
-│   ├── configurations.md
-│   ├── develop
-│   ├── faq.mdx
-│   ├── guides
-│   ├── quickstart.mdx
-│   ├── references
-│   └── release_notes.md
-├── download_deps.py
-├── example
-│   ├── http
-│   └── sdk
-├── graphrag
-│   ├── entity_resolution_prompt.py
-│   ├── entity_resolution.py
-│   ├── general
-│   ├── __init__.py
-│   ├── light
-│   ├── query_analyze_prompt.py
-│   ├── search.py
-│   └── utils.py
-├── helm
-│   ├── Chart.yaml
-│   ├── templates
-│   └── values.yaml
-├── intergrations
-│   ├── chatgpt-on-wechat
-│   └── extension_chrome
-├── LICENSE
-├── pics
-│   ├── ragflow_backend_demo.png
-│   └── ragflow_frontend_demo.png
-├── pyproject.toml
-├── rag
-│   ├── app
-│   ├── benchmark.py
-│   ├── __init__.py
-│   ├── llm
-│   ├── nlp
-│   ├── prompts.py
-│   ├── raptor.py
-│   ├── res
-│   ├── settings.py
-│   ├── svr
-│   └── utils
-├── readme_exe.md
-├── README_id.md
-├── README_ja.md
-├── README_ko.md
-├── README.md
-├── README_pt_br.md
-├── README_tzh.md
-├── README_zh.md
-├── sdk
-│   └── python
-├── SECURITY.md
-├── show_env.sh
-├── uv.lock
-└── web
-    ├── externals.d.ts
-    ├── jest.config.ts
-    ├── jest-setup.ts
-    ├── package.json
-    ├── package-lock.json
-    ├── public
-    ├── src
-    ├── tailwind.config.js
-    ├── tailwind.css
-    ├── tsconfig.json
-    └── typings.d.ts
+|-- CODE_OF_CONDUCT.md
+|-- LICENSE
+|-- MiniMind2
+|   |-- README.md
+|   |-- README_en.md
+|   |-- config.json
+|   |-- generation_config.json
+|   |-- images
+|   |-- model.safetensors
+|   |-- tokenizer.json
+|   `-- tokenizer_config.json
+|-- README.md
+|-- README_en.md
+|-- dataset
+|   |-- README.md
+|   |-- __init__.py
+|   |-- __pycache__
+|   |-- dataset_infos.json
+|   |-- dpo.jsonl
+|   |-- lm_dataset.py
+|   |-- lora_medical.jsonl
+|   |-- pretrain_hq.jsonl
+|   |-- r1_mix_1024.jsonl
+|   |-- sft_1024.jsonl
+|   |-- sft_2048.jsonl
+|   |-- sft_512.jsonl
+|   `-- sft_mini_512.jsonl
+|-- eval_model.py
+|-- flowchart.md
+|-- images
+|   |-- ...
+|-- model
+|   |-- __init__.py
+|   |-- __pycache__
+|   |-- merges.txt
+|   |-- model_lora.py
+|   |-- model_minimind.py
+|   |-- tokenizer.json
+|   |-- tokenizer_config.json
+|   `-- vocab.json
+|-- nohup.out
+|-- out
+|   |-- full_dist_512.pth
+|   |-- ...
+|-- output
+|-- readme_exe.md
+|-- requirements.txt
+|-- scripts
+|   |-- chat_openai_api.py
+|   |-- convert_model.py
+|   |-- serve_openai_api.py
+|   |-- train_tokenizer.py
+|   `-- web_demo.py
+`-- trainer
+    |-- nohup.out
+    |-- train_distill_reason.py
+    |-- train_distillation.py
+    |-- train_dpo.py
+    |-- train_full_sft.py
+    |-- train_lora.py
+    `-- train_pretrain.py
   </code></pre>
 </details>
