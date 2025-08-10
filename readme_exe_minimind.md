@@ -1,13 +1,38 @@
-## minimind仓库介绍
+```llm的全流程get啦。预训练、微调、RLHF、蒸馏、推理模型训练方式全拿下```
 
+
+#### git地址
 
 | git仓库 | 地址 | 主要功能 | star/fork数
 |:-|:-|:-|:-
 | minimind |  [jingyaogong/minimind](https://github.com/jingyaogong/minimind.git) | 大模型预训练微调一条龙demo | 23k/3k
 
 
+#### 本文目录
 
-#### 功能说明
+```sh
+1  minimind仓库介绍
+  1.0.1  功能说明
+  1.0.2  demo说明
+  1.0.3  仓库能干啥
+2  服务跑起来
+  2.1  常规模型训练
+    2.1.1  模型预训练
+    2.1.2  模型SFT微调
+    2.1.3  RLHF训练
+    2.1.4  LORA微调
+    2.1.5  推理模型
+  2.2  其他模型训练方式
+    2.2.1  模型蒸馏
+    2.2.2  tokenizer训练
+3  其他
+  3.1  数据说明
+  3.2  环境说明
+```
+
+## minimind仓库介绍
+
+#### 仓库简介
 
 - 项目是干啥的
     1. 极简语言模型架构与训练:
@@ -25,9 +50,6 @@
        - API的服务端实现（serve_openai_api.py），方便测试和部署模型。
        - 同时支持主流第三方推理框架如llama.cpp、vLLM、ollama。
 
-
-
-## 服务跑起来
 
 
 #### demo说明
@@ -48,8 +70,8 @@ streamlit run web_demo.py --server.port 9994 --server.address 0.0.0.0
 vllm serve ./MiniMind2/ --served-model-name "minimind"
 ```
 
-![minimind_demo_streamlit](./pics/minimind_demo_streamlit.png)
-![minimind_demo_cmd](./pics/minimind_demo_cmd.png)
+![minimind_demo_streamlit](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_demo_streamlit.png)
+![minimind_demo_cmd](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_demo_cmd.png)
 
 
 
@@ -69,6 +91,7 @@ vllm serve ./MiniMind2/ --served-model-name "minimind"
 | [tokenizer模型](#tokenizer训练) | 训练自己的tokenizer分词器 | 1.6G；30min+ | {'text': '<\|im_start\|>鉴别一组中文文章的风格和特点，例如官方、口语、文言等。需要提供样例文章才能准确鉴别不同的风格和特点。<\|im_end\|> <\|im_start\|>好的，现在帮我查一下今天的天气怎么样?今天的天气依据地区而异。请问你需要我帮你查询哪个地区的天气呢？<\|im_end\|>'} 
 
 
+## 服务跑起来
 
 ### 常规模型训练
 
@@ -85,8 +108,8 @@ export CUDA_VISIBLE_DEVICES=4,5,6,7
 torchrun --nproc_per_node 4 train_pretrain.py --data_path ../dataset/pretrain_hq.jsonl # 单节点4卡训练
 ```
 
-![minimind_pretrain_multigpu](./pics/minimind_pretrain_multigpu.png)
-![minimind_pretrain_singlegpu](./pics/minimind_pretrain_singlegpu.png)
+![minimind_pretrain_multigpu](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_pretrain_multigpu.png)
+![minimind_pretrain_singlegpu](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_pretrain_singlegpu.png)
 
 
 
@@ -164,7 +187,7 @@ torchrun --nproc_per_node 4 train_full_sft.py # 多卡
 python train_full_sft.py # 单卡
 ```
 
-![minimind_sft_multigpu](./pics/minimind_sft_multigpu.png)
+![minimind_sft_multigpu](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_sft_multigpu.png)
 
 
 
@@ -234,7 +257,7 @@ Y = torch.tensor(input_ids[1:], dtype=torch.long)
 ```
 
 
-![minimind_stfdataset](./pics/minimind_stfdataset.png)
+![minimind_stfdataset](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_stfdataset.png)
 
 
 
@@ -575,7 +598,7 @@ python train_distillation.py
 python ./scripts/train_tokenizer.py
 ```
 
-![minimind_tokenizer](./pics/minimind_tokenizer.png)
+![minimind_tokenizer](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_tokenizer.png)
 
 
 ## 其他
@@ -600,7 +623,7 @@ python ./scripts/train_tokenizer.py
 | `tokenizer_train.jsonl` | 均来自于`匠数大模型数据集`                                           | 匠数大模型数据集    | 相对次要，不推荐自己重复训练tokenizer      |          | 如需自己训练tokenizer可以自由选择数据集                              |
 
 
-![minimind_dataset](./pics/minimind_dataset.png)
+![minimind_dataset](https://cdn.jsdelivr.net/gh/w666x/image/git/minimind_dataset.png)
 
 
 - 2. 更多开源数据集
