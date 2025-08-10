@@ -1,10 +1,11 @@
 ```llm的全流程get啦。预训练、微调、RLHF、蒸馏、推理模型训练方式全拿下```
 
 
+
 #### git地址
 
 | git仓库 | 地址 | 主要功能 | star/fork数
-|:-|:-|:-|:-
+|--|--|--|--
 | minimind |  [jingyaogong/minimind](https://github.com/jingyaogong/minimind.git) | 大模型预训练微调一条龙demo | 23k/3k
 
 
@@ -30,25 +31,26 @@
   3.2  环境说明
 ```
 
+
 ## minimind仓库介绍
 
 #### 仓库简介
 
 - 项目是干啥的
-    1. 极简语言模型架构与训练:
-       - 实现了一个轻量级（最小26M参数）的Transformer的decode-only语言模型（MiniMind），支持标准和MoE（混合专家）变体。它从头开始用PyTorch实现，旨在让个人开发者能够以极低的成本（约3元人民币）快速训练。
-    2. 全流程训练支持: 提供了完整的训练流程脚本，包括：
-       * **预训练（Pretrain）**：在大规模文本语料库上训练模型的基础知识。
-       * **监督微调（SFT）**：使用对话数据让模型学会以聊天形式交互。
-       * **人类反馈强化学习（RLHF-DPO）**：优化模型回复质量，使其更符合人类偏好。
-       * **模型蒸馏**：通过知识蒸馏技术进一步优化模型性能和效率。
-       * **LoRA微调**：高效地对特定领域（如医疗、自我认知）进行参数高效的微调。
-    3. 自定义分词器与数据处理: 
-       - 包含自定义分词器（tokenizer）的训练代码，以及用于处理和清洗预训练、 SFT、RLHF等各阶段训练 数据的工具和脚本。
-       - 项目提供了多种高质量数据集供训练使用。
-    4. 推理与部署工具: 提供了模型评估脚本（eval_model.py）、Web UI演示（web_demo.py）以及兼容OpenAI
-       - API的服务端实现（serve_openai_api.py），方便测试和部署模型。
-       - 同时支持主流第三方推理框架如llama.cpp、vLLM、ollama。
+    - 1. 极简语言模型架构与训练:
+      - 实现了一个轻量级（最小26M参数）的Transformer的decode-only语言模型（MiniMind），支持标准和MoE（混合专家）变体。它从头开始用PyTorch实现，旨在让个人开发者能够以极低的成本（约3元人民币）快速训练。
+    - 2. 全流程训练支持: 提供了完整的训练流程脚本，包括：
+      * **预训练（Pretrain）**：在大规模文本语料库上训练模型的基础知识。
+      * **监督微调（SFT）**：使用对话数据让模型学会以聊天形式交互。
+      * **人类反馈强化学习（RLHF-DPO）**：优化模型回复质量，使其更符合人类偏好。
+      * **模型蒸馏**：通过知识蒸馏技术进一步优化模型性能和效率。
+      * **LoRA微调**：高效地对特定领域（如医疗、自我认知）进行参数高效的微调。
+    - 3. 自定义分词器与数据处理: 
+      - 包含自定义分词器（tokenizer）的训练代码，以及用于处理和清洗预训练、 SFT、RLHF等各阶段训练 数据的工具和脚本。
+      - 项目提供了多种高质量数据集供训练使用。
+    - 4. 推理与部署工具: 提供了模型评估脚本（eval_model.py）、Web UI演示（web_demo.py）以及兼容OpenAI
+      - API的服务端实现（serve_openai_api.py），方便测试和部署模型。
+      - 同时支持主流第三方推理框架如llama.cpp、vLLM、ollama。
 
 
 
@@ -138,7 +140,7 @@ git clone https://www.modelscope.cn/gongjy/MiniMind2.git
 
 
 | 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
-|:-|:-|:-|:-|:-|:-|:-
+|--|--|--|--|--|--|--
 | 1413103 | 25M | 56MB | 6G |  loss:8.906 → loss:2.368 | 15min | 4卡
 | 1413103 | 25M | 56MB | 6G |   | 45min | 1卡
 
@@ -156,7 +158,7 @@ quality
 
 # 待训练文本
 input_ids为上文的text对应的value分词编码结果
-X = torch.tensor(input_ids[:-1], dtype=torch.long)
+X = torch.tensor(input_ids[--1], dtype=torch.long)
 Y = torch.tensor(input_ids[1:], dtype=torch.long)
 loss_mask = torch.tensor(loss_mask[1:], dtype=torch.long)
 
@@ -200,7 +202,7 @@ python train_full_sft.py # 单卡
 
 
 | 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
-|:-|:-|:-|:-|:-|:-|:-
+|--|--|--|--|--|--|--
 | 6800389 | 25M | 56MB | 4G |  loss:4.547 → loss:2.687 | 12min | 4卡
 
 
@@ -248,7 +250,7 @@ for i, turn in enumerate(conversations):
 prompt = self._create_chat_prompt(sample['conversations'])
 input_ids = self.tokenizer(prompt).input_ids[:self.max_length]
 input_ids += [self.tokenizer.pad_token_id] * (self.max_length - len(input_ids))
-X = torch.tensor(input_ids[:-1], dtype=torch.long)
+X = torch.tensor(input_ids[--1], dtype=torch.long)
 Y = torch.tensor(input_ids[1:], dtype=torch.long)
 
 
@@ -289,7 +291,7 @@ python train_dpo.py
 
 
 | 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
-|:-|:-|:-|:-|:-|:-|:-
+|--|--|--|--|--|--|--
 | 207339 | 25M | 56MB | 6G |  loss:0.693 → loss:0.643 | 15min | 4卡
 
 
@@ -323,10 +325,10 @@ chosen_input_ids = chosen_encoding['input_ids']
 chosen_loss_mask = self._generate_loss_mask(chosen_input_ids)
 rejected_input_ids = rejected_encoding['input_ids']
 rejected_loss_mask = self._generate_loss_mask(rejected_input_ids)
-x_chosen = torch.tensor(chosen_input_ids[:-1], dtype=torch.long)
+x_chosen = torch.tensor(chosen_input_ids[--1], dtype=torch.long)
 y_chosen = torch.tensor(chosen_input_ids[1:], dtype=torch.long)
 mask_chosen = torch.tensor(chosen_loss_mask[1:], dtype=torch.long)
-x_rejected = torch.tensor(rejected_input_ids[:-1], dtype=torch.long)
+x_rejected = torch.tensor(rejected_input_ids[--1], dtype=torch.long)
 y_rejected = torch.tensor(rejected_input_ids[1:], dtype=torch.long)
 mask_rejected = torch.tensor(rejected_loss_mask[1:], dtype=torch.long)
 ```
@@ -384,7 +386,7 @@ python eval_model.py --lora_name 'lora_medical' --model_mode 2
 
 
 | 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
-|:-|:-|:-|:-|:-|:-|:-
+|--|--|--|--|--|--|--
 | 25276 | 0.13M | 524K | 4G |  loss:4.038 → loss:3.446 | 1min | 4卡
 
 
@@ -419,7 +421,7 @@ python eval_model.py --lora_name 'lora_medical' --model_mode 2
 # 5. X的维度为torch.Size([16, 511])，其中16为batch大小
 # input_ids为上文的text对应的value分词编码结果
 
-X = torch.tensor(input_ids[:-1], dtype=torch.long)
+X = torch.tensor(input_ids[--1], dtype=torch.long)
 Y = torch.tensor(input_ids[1:], dtype=torch.long)
 lr = get_lr(epoch * iter_per_epoch + step, args.epochs * iter_per_epoch, args.learning_rate)
 for param_group in optimizer.param_groups:
@@ -464,7 +466,7 @@ python eval_model.py --model_mode 3
 
 
 | 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
-|:-|:-|:-|:-|:-|:-|:-
+|--|--|--|--|--|--|--
 | 190139 | 25M | 56MB | 12G |  loss:7.283 → loss:3.358 | 10min | 4卡
 
 
@@ -495,7 +497,7 @@ python eval_model.py --model_mode 3
 
 # 待训练文本
 input_ids为上文的text对应的value分词编码结果
-X = torch.tensor(input_ids[:-1], dtype=torch.long)
+X = torch.tensor(input_ids[--1], dtype=torch.long)
 Y = torch.tensor(input_ids[1:], dtype=torch.long)
 loss_mask = torch.tensor(loss_mask[1:], dtype=torch.long)
 start_of_think_ids = tokenizer('<think>').input_ids
@@ -557,9 +559,10 @@ python train_distillation.py
     - 学生模型，hidden_size=512, num_hidden_layers=8, 参数量拢共25M
 
 
-| 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数
-|:-|:-|:-|:-|:-|:-|:-
-| 5390665 | 104M → 25M | 208M → 56M | 24G |  loss:2.4886 → loss:0.3540 | 275min | 4卡
+
+| 数据量 | 模型大小 | 模型磁盘占用 | 显存占用 | 下降速度 | 训练时长/epoch | GPU数 | 
+|--|--|--|--|--|--|-- | 
+| 5390665 | 104M → 25M | 208M → 56M | 24G |  loss:2.4886 → loss:0.3540 | 275min | 4卡 | 
 
 
 - 3. 数据集demo
